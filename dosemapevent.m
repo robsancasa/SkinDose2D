@@ -1,35 +1,30 @@
-function dmap = dosemapevent(prim_ang, sec_ang, x_shut_l, x_shut_r,y_shut_t,...
-    y_shut_b, fid, kerma, x_couch, y_couch, z_couch, kv)
-% Devuelve la matriz 281x281 elementos representando el kerma del evento
-% de radiación calculado en el plano de la mesa de 700x700 mm2
+function dmap = dosemapevent(prim_ang, sec_ang, coll_w, coll_h,...
+    fid, kerma, x_couch, y_couch, z_couch, kV, f1mat, f1thick, f2mat, f2thick)
 
-% prim_ang es el ángulo º de rotación respecto del eje y, lateral.
+% Devuelve la matriz 281x281 elementos representando el kerma del evento
+% de radiaciÃ³n calculado en el plano del punto de ref interv de 700x700 mm2
+
+% prim_ang es el Ã¡ngulo Âº de rotaciÃ³n respecto del eje y, lateral.
 % Si prim_ang>0 el detector va desde la derecha del paciente al centro
 
-% sec_ang es el ángulo º de rotación respecto del eje x, cran-cau.
-% Si x_ang>0 el detector va de la posición caudal hacia el centro
+% sec_ang es el Ã¡ngulo Âº de rotaciÃ³n respecto del eje x, cran-cau.
+% Si x_ang>0 el detector va de la posiciÃ³n caudal hacia el centro
 
-% x_shut_l es el hemicampo en la dirección x izda en mm. Definido a 1 m 
-% del focopara los philps allura
+% coll_w (mm) es el campo X definido a 1 m
 
-% x_shut_r es el hemicampo en la dirección x dcha en mm. Definido a 1 m 
-% del foco para los philps allura
-
-% y_shut_t es el hemicampo en la dirección y arriba en mm. Definido a 1 m 
-% del foco para los philips allura
-
-% y_shut_b es el hemicampo en la dirección y arriba en mm. Definido a 1 m 
-% del foco para los philips allura
+% coll_h (mm) es el campo Y definido a 1 m
 
 % fid es la distancia foco isocentro en mm
 
-% k es el kerma en el punto de referencia de entrada al paciente en mGy
+% k es el kerma en el punto de referencia de entrada al paciente en Gy
 
-% x_couch es el desplazamiento lateral de la mesa. Si x_couch>0 la mesa
-% se desplaza a la izquierda del paciente (el campo hacia la derecha del mapa)
+% x_couch es el desplazamiento lateral de la mesa respecto de la posicion 
+% anterior. Si x_couch>0 la mesa se desplaza a la izquierda del paciente
+% (el campo hacia la derecha del mapa). Paciente en supino
 
-% y_couch es el desplazamiento cabeza-pies de la mesa. Si y_couch>0 la mesa
-% se desplaza hacia la cabeza (el campo hacia los pies del mapa)
+% y_couch es el desplazamiento cabeza-pies de la mesa respecto de la 
+% posicion anterior. Si y_couch>0 la mesa % se desplaza hacia la cabeza 
+% (el campo hacia los pies del mapa). Paciente en supino.
 
 % z_couch es el desplazamiento de mesa en altura en mm respecto del plano de
 % referencia que a su vez esta 150 mm bajo el isocentro. Si z_couch<0 hacia
@@ -46,11 +41,11 @@ function dmap = dosemapevent(prim_ang, sec_ang, x_shut_l, x_shut_r,y_shut_t,...
 %x_couch = 0;
 %y_couch = 0;
 %z_couch = 0;
-%kv = 80;
+%kV = 80;
 
 % Para estar de acuerdo con el estandar dicom, los primary y secondary
-% Estándar DICOM detector derecha paciente prim angle < 0
-% Estándar DICOM detector craneal sec angle < 0
+% EstÃ¡ndar DICOM detector derecha paciente prim angle < 0
+% EstÃ¡ndar DICOM detector craneal sec angle < 0
 
 %matriz de rotaciones respecto eje x cran caud
 Rx = [1 0 0;0 cos(sec_ang*pi/180) -sin(sec_ang*pi/180);...
@@ -61,10 +56,10 @@ Rx = [1 0 0;0 cos(sec_ang*pi/180) -sin(sec_ang*pi/180);...
 Ry = [cos(-prim_ang*pi/180) 0 sin(-prim_ang*pi/180);0 1 0;...
     -sin(-prim_ang*pi/180) 0 cos(-prim_ang*pi/180)];
 
-xcol = (x_shut_l+x_shut_r)*fid/1000; % colimador x en plano del iso en mm
-ycol = (y_shut_t+y_shut_b)*fid/1000; % colimador y en plano del iso en mm
+xcol = coll_w * fid/1000; % colimador x en plano del iso en mm
+ycol = coll_h * fid/1000; % colimador y en plano del iso en mm
 
-% El origen de coordenadas está localizado en el isocentro
+% El origen de coordenadas estÃ¡ localizado en el isocentro
 % iso = [0; 0; 0];
 
 % Foco cuando no hay rotaciones
@@ -94,34 +89,34 @@ FP_mp = prot_mp - foco;
 FP_mm = prot_mm - foco;
 FP_pm = prot_pm - foco;
 
-% El plano de calculo estará en el plano del punto de referencia
+% El plano de calculo estarÃ¡ en el plano del punto de referencia
 p_calc = -150; %+ z_couch no utilizado;
 
-% Parámetro t resultante de la solución de la intersección recta con el
+% ParÃ¡metro t resultante de la soluciÃ³n de la intersecciÃ³n recta con el
 % plano de calculo
 t_FP_pp = (p_calc-prot_pp(3))/FP_pp(3);
 t_FP_mp = (p_calc-prot_mp(3))/FP_mp(3);
 t_FP_mm = (p_calc-prot_mm(3))/FP_mm(3);
 t_FP_pm = (p_calc-prot_pm(3))/FP_pm(3);
 
-% Intersección de las 4 rectas (aristas de la pirámide) que definen el haz
-% con el plano de de calculo = vértices del campo en su proyección del 
-% campo en el plano de cálculo
+% IntersecciÃ³n de las 4 rectas (aristas de la pirÃ¡mide) que definen el haz
+% con el plano de de calculo = vÃ©rtices del campo en su proyecciÃ³n del 
+% campo en el plano de cÃ¡lculo
 pp = prot_pp + t_FP_pp * FP_pp;
 mp = prot_mp + t_FP_mp * FP_mp;
 mm = prot_mm + t_FP_mm * FP_mm;
 pm = prot_pm + t_FP_pm * FP_pm;
 
 % xvert e yvert son vectores que definen las coordenadas x e y de los  
-% vértices del cuadrilátero que define la proyección del campo en el plano
-% de cálculo
+% vÃ©rtices del cuadrilÃ¡tero que define la proyecciÃ³n del campo en el plano
+% de cÃ¡lculo
 xvert = [pp(1) mp(1) mm(1) pm(1) pp(1)];
 yvert = [pp(2) mp(2) mm(2) pm(2) pp(2)];
 centro = [(pp(1)+ mp(1) +mm(1) + pm(1))/4;...
     (pp(2) + mp(2) + mm(2) + pm(2))/4; (pp(3) + mp(3) + mm(3) + pm(3))/4];
 
 % Matriz de mapa de dosis de n x m elementos para cubrir un area de
-% 700x700 mm y resolución resx x resy mm.
+% 700x700 mm y resoluciÃ³n resx x resy mm.
 m = 281;
 n = 281;
 resx = 700/(m-1);
@@ -135,22 +130,23 @@ xquer = repmat(xq,281,1);
 yq = (-350:resy:350)';
 yquer = repmat(yq,1,281);
 
-% En caso de que la mesa no esté centrada en x e y aplicamos desplazamiento
+% En caso de que la mesa no estÃ© centrada en x e y aplicamos desplazamiento
 % de mesa
+% x_couch positivo
 xvert = xvert + x_couch;
-yvert = yvert - y_couch;
+yvert = yvert + y_couch;
 foco(1) = foco(1) + x_couch;
-foco(2) = foco(2) - y_couch;
+foco(2) = foco(2) + y_couch;
 
-% Calculamos la matriz facdist con el factor de correción por inverso del
+% Calculamos la matriz facdist con el factor de correciÃ³n por inverso del
 % cuadrado de la distancia para todos los puntos del plano de calculo
-facdist = power(xquer-foco(1),2)+power(yquer-foco(2),2);
-facdist = facdist+(p_calc-foco(3))^2;
+facdist = power(xquer-foco(1),2)+power(yquer-foco(2),2) + ...
+    (p_calc-foco(3))^2;
 facdist = power(facdist,0.5);
 facdist = power(facdist*1/(fid-150),-2);
 %mesh(facdist);
 
-% Comprueba que el punto del plano (xquer,yquer)está dentro del cuadrilátero que
+% Comprueba que el punto del plano (xquer,yquer)estÃ¡ dentro del cuadrilÃ¡tero que
 % que define el campo y en caso afirmativo le asigna el kerma k
 in=inpolygon(xquer,yquer,xvert,yvert);
 dmap=in*kerma;
@@ -158,26 +154,24 @@ dmap=in*kerma;
 % Aplicamos el factor distancia a cada punto del plano de calculo
 dmap = times(facdist,dmap);
 
-% Aplicamos factor de retrodispersion
-field_area = polyarea(xvert,yvert)/100; %Area en cm2
-if field_area > 500   
+% Calculamos factor de retrodispersion
+area = polyarea(xvert, yvert)/100; % Area en cm2 en el plano de ref.
+%if area > 500   
     %disp(strcat('Warning: event',{' '},...
         %'with larger area than 500 cm2. BSF may be understimated'))
-end
-bsf = BackScatterFactor(field_area);
+%end
+[bsf, u_en_ro] = bsf_mu(area, kV, f1mat, f1thick, f2mat, f2thick);
 
 % Factor de atenuacion de la mesa
-m_att = TableTrans(kv, prim_ang, sec_ang);
+m_att = TableTransmision(kV, prim_ang, sec_ang, f1mat, f1thick, f2mat,...
+    f2thick);
 
-% Aplicamos otros factores
-ffactor = 1.06;
-
-dmap = dmap*bsf*m_att*ffactor;
+dmap = dmap*bsf*m_att*u_en_ro;
 
 %Representamos mapa dosis
 %contourf(xquer,yquer,dmap,10);     
 
 %% Creamos log
-dlmwrite('dosemap.log',[kerma, bsf, m_att, pdist([foco';pp']),...
-    pdist([foco';pm']), pdist([foco';mp']), pdist([foco';mm'])], '-append')
+% dlmwrite('dosemap.log',[kerma, bsf, m_att, pdist([foco';pp']),...
+%     pdist([foco';pm']), pdist([foco';mp']), pdist([foco';mm'])], '-append')
         

@@ -1,163 +1,236 @@
-% Calcula el mapa de dosis de un informe estructurado de un philips allura
+% Calcula el mapa de dosis de un philips Azurion con la info de DOLQA.
+% VersiÃ³n de 2023
+
+%% 21/04/23  Cambiar color map por iec
+
 function dosemap(rdsrFileName)
 
-% rdsr es el fichero que contiene el informe estructurado de dosis
-% Cada fila es un evento de radiación con los datos separados por \t
+% rdsr es el fichero que contiene la tabla con la informaciÃ³n del informe 
+% estructurado de dosis.
+% Cada fila es un evento de radiaciÃ³n con los datos separados por ';' con
+% los siguientes campos:
 
-% eventUID es la id del evento
+%% Campo                             DescripciÃ³n
+% StudyInstanceUid_Fkey             id del procedimiento
+% IrradiationEventUID               id del evento
+% AcquisitionProtocol                  
+% AcquisitionPlane                  Single Plane/Frontal/Lateral
+% DateTimeStarted
+% IrradiationEventType              Fluoroscopy/Stationary Aquisition
+% ReferencePointDefinition          
+% DoseAreaProduct                   KAP (GyÂ·cm2)
+% DoseRP                            Kerma en PRef Interv (Gy)
+% PositionerPrimaryAngle            Angulo lateral (gra) segun DICOM LAO =
+%                                   +90Âº y RAO = -90Âº posicion det imag.
+% PositionerSecondaryAngle          Angulo cra-caudal (gra) segun DICOM
+%                                   CRAN = +90Âº CAU = -90Âº posicion det img
+% XRayFilter1Type                   
+% XRayFilter1Material               
+% XRayFilter1ThicknessMinimum       (mm) usado para calculo
+% XRayFilter1ThicknessMaximum       (mm)
+% XRayFilter2Type
+% XRayFilter2Material
+% XRayFilter2ThicknessMinimum       (mm) usado para calculo
+% XRayFilter2ThicknessMaximum       (mm)
+% FluoroMode                        PULSED/CONTINOUS
+% PulseRate                         (fr/s)
+% NumberofPulses
+% XRayTubeCurrent                   (mA)
+% DistanceSourcetoIsocenter         (mm)
+% KVP                               
+% ExposureTime                      
+% Exposure
+% PulseWidth                        (ms)
+% IrradiationDuration
+% PatientTableRelationship          headfirst/feetfirst/... Orientation of   
+%                                   the Patient with respect to the Head 
+%                                   of the Table.
+% PatientOrientation                Orientation of the Patient with respect
+%                                   to Gravity.
+% PatientOrientationModifier        supine/prone/lateral  Enhances or 
+%                                   modifies the Patient orientation 
+%                                   specified in Patient Orientation.
+% TargetRegion                      Head/Chest/Abdomen...
+% NumberofFrames
+% SubImagesperFrame
+% BottomShutter                                       
+% LeftShutter
+% RightShutter
+% TopShutter
+% LongitudinalBeamPosition          Posicion longitudinal del brazo. Campo 
+%                                   privado Philips no en GE o Siemens
+% BeamAngle                         Angulo del brazo en suspensiÃ³n. Campo 
+%                                   privado Philips no en GE o Siemens
+% TableHeightPosition               (mm) 113753 Table Height Position with 
+%                                   respect to an arbitrary chosen 
+%                                   reference by the equipment in (mm). 
+%                                   Table motion downwards is positive.
+% CollimatedFieldArea
+% PatientEquivalentThickness        (mm) Value of the control variable used
+%                                   to parametrize the Automatic Exposure 
+%                                   Control (AEC) closed loop. E.g., "Water Value".
+% CollimatedFieldHeight             Y (mm) Distance between the collimator
+%                                   blades in pixel column direction as 
+%                                   projected at the detector plane.
+% CollimatedFieldWidth              X (mm) Distance between the collimator 
+%                                   blades in pixel row direction as 
+%                                   projected at the detector plane.
+% DistanceSourcetoDetector          (mm) Measured or calculated distance 
+%                                   from the X-Ray source to the detector 
+%                                   plane in the center of the beam.
+% TableLongitudinalPosition         (mm) 113751 Table Longitudinal Position
+%                                   with respect to an arbitrary reference 
+%                                   chosen by the equipment. Table 
+%                                   longitudinal motion is positive towards
+%                                   the left of the patient assuming the 
+%                                   patient is positioned HEAD FIRST SUPINE.   
+% TableLateralPosition              (mm) 113752 Table Lateral Position with
+%                                   respect to an arbitrary reference 
+%                                   chosen by the equipment. Table lateral 
+%                                   motion is positive towards the head of
+%                                   the patient assuming the patient is 
+%                                   positioned HEAD FIRST.
+% DistanceWedge1
+% DistanceWedge2
+% AngleWedge1
+% AngleWedge2
+% LateralBeamPosition               (mm) posiciÃ³n lat brazo en suspensiÃ³n 
+%                                   campo privado Philips no en GE o Siemens.
+%
+% DescripciÃ³n de los campos en 
+% https://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_xrayradiationdosesriodtemplates.html
+% https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_D.html#DCM_113866
+% https://dicom.nema.org/medical/dicom/current/output/chtml/part16/chapter_d.html
+% https://dicom.nema.org/medical/dicom/2017c/output/chtml/part16/sect_CID_10008.html
+% Angulos prim y sec
+% https://dicom.nema.org/medical/Dicom/2017c/output/chtml/part03/sect_C.8.7.5.html#:~:text=The%20valid%20range%20of%20Primary,%2D90%20to%20%2B%2090%20degrees.
+% Mesa
+% https://dicom.nema.org/medical/Dicom/2016b/output/chtml/part03/sect_C.8.19.6.11.html
 
-% primary_angle es el ángulo º de rotación respecto del eje y, lateral.
-% Si prim_ang>0 el detector va desde la derecha del paciente al centro
-
-% secondary_angle es el ángulo º de rotación respecto del eje x, cran-cau.
-% Si x_ang>0 el detector va de la posición caudal hacia el centro
-
-% shutter_left es el hemicampo en la dirección x izda en mm. Definido a 1 m 
-% del focopara los philps allura
-
-% shutter_rigth es el hemicampo en la dirección x dcha en mm. Definido a 1 m 
-% del foco para los philps allura
-
-% shutter_top es el hemicampo en la dirección y arriba en mm. Definido a 1 m 
-% del foco para los philips allura
-
-% shutter_bottom es el hemicampo en la dirección y arriba en mm. Definido a 1 m 
-% del foco para los philips allura
-
-% focus isocenter distance en mm
-
-% kerma_rp es el kerma en el punto de referencia de entrada al paciente en mGy
-
-% couch_lateral es el desplazamiento lateral de la mesa. Si x_couch>0 la mesa
-% se desplaza a la izquierda del paciente (el campo hacia la derecha del mapa)
-
-% couch_longitudinal es el desplazamiento cabeza-pies de la mesa. Si y_couch>0 la mesa
-% se desplaza hacia la cabeza (el campo hacia los pies del mapa)
-
-% couch_vertical es el desplazamiento de mesa en altura en mm respecto del plano de
-% referencia que a su vez esta 150 mm bajo el isocentro. Si z_couch<0 hacia
-% el foco
-
-% kv es el kilovoltage del evento
-
-%% Lectura de los ficheros de eventos y almacenado en una struct.
-%rdsrFileName = 'C:\Users\roberto\Dropbox\MATLAB\dosemap3D_3\doc\Signos_angulos\01.txt';
-procedures = strsplit(rdsrFileName, ' ')';
-formato = '%n %s %s %s %n %n %n %n %n %n %n %n %n %n %n %n %n %n %s %n %n %s %n %n %n';
-columnas = {'IrradiationEventUID', 'TargetRegion',	'Manufacturer',...
-    'AcquisitionPlane',	'PositionerPrimaryAngle',...
-    'PositionerSecondaryAngle',	'LeftShutter',	'RightShutter',...
-    'TopShutter',	'BottomShutter',	'DistanceSourcetoIsocenter',...
-    'DoseRP',	'couch_lat', 'couch_long',	'couch_vert',	'KVP',...
-    'CollimatedFieldArea',	'TableHeightPosition',	'XRayFilter1Material'...
-    'XRayFilter1ThicknessMinimum',	'XRayFilter1ThicknessMaximum',...
-    'XRayFilter2Material',	'XRayFilter2ThicknessMinimum',...
-    'XRayFilter2ThicknessMaximum',	'LongitudinalBeamPosition'};
-[directorio,nombrefichero,~] = fileparts(procedures{1});
-
-for i=1:length(procedures)    
-    EventFile = fopen(procedures{i});
-    try
-        fichero = textscan(EventFile, formato, 'Delimiter', '\t', ...
-        'HeaderLines', 1, 'ReturnOnError', 0);
-    catch
-        disp('error al abrir fichero');
-        return
-    end
-    fclose(EventFile);
-    events(i) = cell2struct(fichero, columnas, 2);
+%% Lectura de los ficheros de eventos y almacenado en una tabla.
+try
+    events = readtable(rdsrFileName, 'DecimalSeparator', ',');
+catch excepcion
+    disp('error al abrir fichero');
+    return
 end
 
-%% Inicializo la matriz de distribución de dosis
+%% Inicializo la matriz de distribuciÃ³n de dosis
 m = 0;
 %% Calculamos los procedimientos y los eventos y los sumamos en un mismo
 %  fichero
-for k=1:length(procedures)
-    % Clasificamos por fabricante
-    switch events(k).Manufacturer{1}
-        case 'Philips Medical Systems'
-            DistFocoSuelo = 273; %mm
-            %DistRPSuelo = 915; %mm
-        case 'TOSHIBA_MEC'
-            %DistRPSuelo = 890;
-            DistFocoSuelo = 340;
-            disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
-            events(k).Manufacturer{1},' system.'));
-            disp(strcat(events(k).Manufacturer(1),' not supported'));
-            return %termina el programa;
-        case 'SIEMENS'
-            DistFocoSuelo = 310
-            disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
-            events(k).Manufacturer{1},' system.'));
-            disp(strcat(events(k).Manufacturer(1),' not supported'));
-            return %termina el programa;
-        otherwise
-            disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
-            events(k).Manufacturer{1},' system.'));
-            disp(strcat(events(k).Manufacturer(1),' not supported'));
-            return %termina el programa;
-    end
-    % Clasificamos por region corporal
-    switch events(k).TargetRegion{1};
-        case 'Chest'
-        otherwise
-            disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
-            events(k).TargetRegion{1}));
-            disp('Calculation only valid for Chest');
-            disp('Program interrupted');
-            return %termina el programa;
-    end
-    nEvents = length(events(k).IrradiationEventUID);
-    for i = 1:nEvents
-        AcquisPlane = events(k).AcquisitionPlane(i);
-        primary_angle = events(k).PositionerPrimaryAngle(i);
-        secondary_angle = events(k).PositionerSecondaryAngle(i);
-        shutter_left = events(k).LeftShutter(i);
-        shutter_rigth = events(k).RightShutter(i);
-        shutter_top = events(k).TopShutter(i);
-        shutter_bottom = events(k).BottomShutter(i);
-        fid = events(k).DistanceSourcetoIsocenter(i);
-        kerma_rp = events(k).DoseRP(i);
+% Clasificamos por fabricante
+% switch events.Manufacturer{1}
+%     case 'Philips Medical Systems'
+%         DistFocoSuelo = 273; %mm
+%         %DistRPSuelo = 915; %mm
+%     case 'TOSHIBA_MEC'
+%         %DistRPSuelo = 890;
+%         DistFocoSuelo = 340;
+%         disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
+%         events.Manufacturer{1},' system.'));
+%         disp(strcat(events.Manufacturer(1),' not supported'));
+%         return %termina el programa;
+%     case 'SIEMENS'
+%         DistFocoSuelo = 310
+%         disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
+%         events.Manufacturer{1},' system.'));
+%         disp(strcat(events.Manufacturer(1),' not supported'));
+%         return %termina el programa;
+%     otherwise
+%         disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
+%         events.Manufacturer{1},' system.'));
+%         disp(strcat(events.Manufacturer(1),' not supported'));
+%         return %termina el programa;
+% end
+
+%% Clasificamos por region corporal
+switch events.TargetRegion{1}
+    case 'Head'
+        disp(strcat('Procedure',{' '},num2str(k),' performed at',{' '},...
+        events.TargetRegion{1}));
+        disp('Calculation NOT valid for Head');
+        disp('Program interrupted');
+        return %termina el programa;
+end
+%% Revisamos colimaciÃ³n y utilizamos shutters si Collimated Field estÃ¡
+% vacÃ­o. Caso de los Allura. No necesario.
+if any(events.CollimatedFieldWidth == 0) || any(events.CollimatedFieldHeight == 0)
+    events.CollimatedFieldHeight = events.TopShutter + events.BottomShutter;
+    events.CollimatedFieldWidth = events.LeftShutter + events.RightShutter;
+end
+% Si la colimaciÃ³n sigue siendo 0 termina programa
+if any(events.CollimatedFieldWidth == 0) || any(events.CollimatedFieldHeight == 0)
+    disp(strcat('Procedure',{' '},num2str(k),', event',{' '},num2str(i)));
+    disp('Program terminated: No collimation information available');
+    return
+end
+
+%% Revisamos distancia foco isocentro
+if any(events.DistanceSourcetoIsocenter)==0
+    disp('Program terminated: No distance source to isocenter available');
+    return
+end
+
+%% Calculamos para cada evento
+nEvents = length(events.IrradiationEventUID);
+for i = 1:nEvents
+    AcquisPlane = events.AcquisitionPlane(i);
+    primary_angle = events.PositionerPrimaryAngle(i);
+    secondary_angle = events.PositionerSecondaryAngle(i);
+    shutter_left = events.LeftShutter(i);
+    shutter_rigth = events.RightShutter(i);
+    shutter_top = events.TopShutter(i);
+    shutter_bottom = events.BottomShutter(i);
+    CollimatedFieldHeight = events.CollimatedFieldHeight(i)*...
+        1000/events.DistanceSourcetoDetector(i);
+    CollimatedFieldWidth = events.CollimatedFieldWidth(i)*...
+        1000/events.DistanceSourcetoDetector(i);
+    fid = events.DistanceSourcetoIsocenter(i);
+    kerma_rp = events.DoseRP(i);
+    % La mesa se redefine desde la definicion dicom. Dicom es desde el
+    % punto de vista del operador situado a la dcha paciente en supino.
+    if i == 1
         couch_lateral = 0;
         couch_longitudinal = 0;
         couch_vertical = 0;
-        %HS = str2num(HeightSys);
-        %couch_vertical = events(k).TableHeightPosition(i)-(HS-150);
-        kv = events(k).KVP(i);
-        filter1 = 0;
-        filter2 = 0;
-        % Si los shutters estan vacíos, tomamos area y hacemos campo cuadrado
-        if (shutter_left == 0 && shutter_right == 0 && shutter_top == 0 &&...
-                shutter_bottom == 0)
-            disp(strcat('Procedure',{' '},num2str(k),', event',{' '},num2str(i)));
-            disp('Program terminated: No shutter information available');
-            return
-        %    shutter_left = power(event.CollimatedFieldArea(i),0.5)/2;
-        %    shutter_rigth = power(event.CollimatedFieldArea(i),0.5)/2;
-        %    shutter_top = power(event.CollimatedFieldArea(i),0.5)/2;
-        %    shutter_bottom = power(event.CollimatedFieldArea(i),0.5)/2;
-        end
-        try
-            dme = dosemapevent(primary_angle,secondary_angle,shutter_left,...
-                shutter_rigth, shutter_top, shutter_bottom, fid, kerma_rp,...
-                couch_lateral, couch_longitudinal, couch_vertical,kv);
-        catch
-            disp('error in dosemapevent function')
-            return
-        end
-        m = m + dme;
+    else
+        couch_lateral = events.TableLongitudinalPosition(i)-events.TableLongitudinalPosition(i-1);
+        couch_longitudinal = events.TableLateralPosition(i)-events.TableLateralPosition(i-1);
+        couch_vertical = 0; % No utilizado events.TableHeightPosition(i)
     end
-end
 
+    %HS = str2num(HeightSys);
+    %couch_vertical = events.TableHeightPosition(i)-(HS-150);
+    kv = events.KVP(i);
+    XRayFilter1Material = events.XRayFilter1Material(i);
+    XRayFilter1ThicknessMinimum = events.XRayFilter1ThicknessMinimum(i);
+    XRayFilter2Material = events.XRayFilter2Material(i);
+    XRayFilter2ThicknessMinimum = events.XRayFilter2ThicknessMinimum(i);
+    
+    try      
+        dme = dosemapevent(primary_angle, secondary_angle,...
+            CollimatedFieldWidth, CollimatedFieldHeight, fid, kerma_rp,...
+            couch_lateral, couch_longitudinal, couch_vertical, kv,...
+            XRayFilter1Material, XRayFilter1ThicknessMinimum,...
+            XRayFilter2Material, XRayFilter2ThicknessMinimum);
+    catch excepcion
+        disp('error in dosemapevent function')
+        return
+    end
+    m = m + dme;
+end
+% Pasamos a mGy para grafico.
+m = 1000*m;
 %% Obtenemos la dosis pico de la matriz suma de todos los eventos
 psk = max(max(m));
 
-%% Creamos gráfico
+%% Creamos grÃ¡fico
 %grafico en png
 X=[-350 350];
 Y=[-350 350];
 fig = figure;
-set(fig,'Visible','off'); % la figura no se ve pero se imprime
+%set(fig,'Visible','off'); % la figura no se ve pero se imprime
 ax = axes;
 colormap jet
 c = ([100 300 1000 3000 10000 15000]);
