@@ -200,8 +200,6 @@ for i = 1:nEvents
     m = m + dme;
 end
 
-% Pasamos a mGy para grafico.
-m = 1000*m;
 %% Obtenemos la dosis pico de la matriz suma de todos los eventos
 psk = max(max(m));
 
@@ -212,18 +210,22 @@ Y=[-800 800];
 fig = figure;
 set(fig,'Visible','off'); % la figura no se ve pero se imprime
 ax = axes;
-colormap jet
-c = ([100 300 1000 3000 10000 15000]);
-caxis = ([log(c(1)) log(c(length(c)))]);
-imagesc(X, Y, log(m+1), caxis);
-colorbar('FontSize',11,'YTick', log(c), 'YTickLabel', c);
-%ax.YDir = 'normal';
+colormap([0 0 1;0 0 1;0 0 1;...                      %azul 00-3000
+    1 1 0; 1 1 0; ...                                % amarillo 3000-5000
+    1 0.5 0; 1 0.5 0; 1 0.5 0; 1 0.5 0; 1 0.5 0; ... %naranja 5000-10000
+    1 0 0; 1 0 0; 1 0 0; 1 0 0; 1 0 0; ...           %rojo 10000-15000
+    1 1 1; 1 1 1])                                   %blanco > 15000
+c = ([0 3 5 10 15 17]);
+caxis = ([c(1) c(6)]);
+imagesc(X, Y, m, caxis);
+colorbar('FontSize',11,'YTick', c, 'YTickLabel', ...
+    {'0,0', '3,0', '5,0', '10,0', '15,0 Gy', ''});
 pbaspect([1,2,1]);
 titul = strcat('Mapa de dosis a 15 cm bajo el isocentro. Dmax = ',...
-    num2str(round(psk)),' mGy');
+    num2str(round(psk,1)),' Gy');
 ax.Title.String = titul;
-ax.XLabel.String = 'Izda                      Vista de la espalda (mm)                        Dcha pac.';
-ax.YLabel.String = 'Cabeza                                                  (mm)                                                    Pies';
+ax.XLabel.String = 'Izda         (mm)         Dcha pac.';
+ax.YLabel.String = 'Pies                  (mm)                 Cabeza';
 
 %% Escribimos resultados
 % Creamos nombre de fichero 
@@ -238,13 +240,12 @@ catch excepcion
 end
 clf(fig);
 delete(get(fig,'children'));
-%warning('off','all');
 
 % Cierra el fichero log y el diario.
 diary off;
 
-% Proporciona el PSD por consola
-disp (psk);
+% Proporciona el PSD por consola en mGy
+disp (1000*psk);
 
 return
 end
