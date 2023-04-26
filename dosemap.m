@@ -241,11 +241,12 @@ clf(fig);
 delete(get(fig,'children'));
 %warning('off','all');
 
+% Cierra el fichero log y el diario.
+diary off;
+
 % Proporciona el PSD por consola
 disp (psk);
 
-% Cierra el fichero log y el diario.
-diary off;
 return
 end
 
