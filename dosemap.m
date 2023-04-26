@@ -207,8 +207,8 @@ psk = max(max(m));
 
 %% Creamos gráfico
 %grafico en png
-X=[-350 350];
-Y=[-350 350];
+X=[-400 400];
+Y=[-800 800];
 fig = figure;
 set(fig,'Visible','off'); % la figura no se ve pero se imprime
 ax = axes;
@@ -218,14 +218,13 @@ caxis = ([log(c(1)) log(c(length(c)))]);
 imagesc(X, Y, log(m+1), caxis);
 colorbar('FontSize',11,'YTick', log(c), 'YTickLabel', c);
 %ax.YDir = 'normal';
-%daspect = [1,1];
+pbaspect([1,2,1]);
 titul = strcat('Mapa de dosis a 15 cm bajo el isocentro. Dmax = ',...
     num2str(round(psk)),' mGy');
 ax.Title.String = titul;
 ax.XLabel.String = 'Izda                      Vista de la espalda (mm)                        Dcha pac.';
-ax.YLabel.String = '(mm)';
-text(-250,-425,'Warning: Lateral and longitudinal couch displacements were not available for dose calculation.',...
-    'FontSize', 7);
+ax.YLabel.String = 'Cabeza                                                  (mm)                                                    Pies';
+
 %% Escribimos resultados
 % Creamos nombre de fichero 
 NombreMapa = strcat(rdsrFileName,'.png');

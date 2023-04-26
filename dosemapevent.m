@@ -116,19 +116,19 @@ centro = [(pp(1)+ mp(1) +mm(1) + pm(1))/4;...
     (pp(2) + mp(2) + mm(2) + pm(2))/4; (pp(3) + mp(3) + mm(3) + pm(3))/4];
 
 % Matriz de mapa de dosis de n x m elementos para cubrir un area de
-% 700x700 mm y resolución resx x resy mm.
-m = 281;
-n = 281;
-resx = 700/(m-1);
-resy = 700/(n-1);
+% 800x1600 mm y resolución 2.5 mm resx x resy mm.
+m = 321;
+n = 641;
+resx = 800/(m-1);
+resy = 1600/(n-1);
 %dmap = zeros(m,n);
 
 % Definimos las matrices xquer e yquer que contienen las coordenadas x e y
 % del plano de calculo, de -350 a 350 mm
-xq = -350:resx:350;
-xquer = repmat(xq,281,1);
-yq = (-350:resy:350)';
-yquer = repmat(yq,1,281);
+xq = -400:resx:400;
+xquer = repmat(xq,n,1);
+yq = (-800:resy:800)';
+yquer = repmat(yq,1,m);
 
 % En caso de que la mesa no esté centrada en x e y aplicamos desplazamiento
 % de mesa
@@ -140,7 +140,7 @@ foco(2) = foco(2) + y_couch;
 
 % Calculamos la matriz facdist con el factor de correción por inverso del
 % cuadrado de la distancia para todos los puntos del plano de calculo
-facdist = power(xquer-foco(1),2)+power(yquer-foco(2),2) + ...
+facdist = power(xquer-foco(1),2) + power(yquer-foco(2),2) + ...
     (p_calc-foco(3))^2;
 facdist = power(facdist,0.5);
 facdist = power(facdist*1/(fid-150),-2);
