@@ -2,9 +2,9 @@
 Madrid 24 de abril de 2023<br>
 Estima el mapa de dosis piel en un plano horizontal en el punto de referencia intervencionista para equipos de la modalidad XA utilizados en cardiología y radiología intervencionistas.<br>
 <br>
-Uso:<br>
+Uso del fichero ejecutable para windows:<br>
 <br>
-dosemap nombrefichero<br>
+dosemap.exe nombrefichero<br>
 <br>
 nombrefichero es un fichero de texto proporcionado por el sistema DOLQA con la informacion necesaria para el cálculo tal y como se describe más abajo.<br>
 <br>
