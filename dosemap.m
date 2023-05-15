@@ -131,6 +131,15 @@ switch events.TargetRegion{1}
         diary off;
         return %termina el programa;
 end
+
+%% Revisamos distancia foco detector
+if any(events.DistanceSourcetoDetector==0)
+    disp('Program terminated: No distance source to isocenter available');
+    disp(events.DistanceSourcetoDetector);
+    diary off;
+    return
+end
+
 %% Revisamos colimación y utilizamos shutters si Collimated Field está
 % vacío. Caso de los Allura. No necesario.
 if any(events.CollimatedFieldWidth == 0) || any(events.CollimatedFieldHeight == 0)
@@ -240,12 +249,13 @@ catch excepcion
 end
 clf(fig);
 delete(get(fig,'children'));
-
+disp('Dosis pico en piel (mGy)');
+disp(1000*psk);
 % Cierra el fichero log y el diario.
 diary off;
 
 % Proporciona el PSD por consola en mGy
-disp (1000*psk);
+disp(1000*psk)
 
 return
 end
