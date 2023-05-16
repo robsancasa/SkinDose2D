@@ -1,7 +1,6 @@
 % Calcula el mapa de dosis de un philips Azurion con la info de DOLQA.
 % Versión de 2023
 
-%% 21/04/23  Cambiar color map por iec
 
 function dosemap(rdsrFileName)
 
