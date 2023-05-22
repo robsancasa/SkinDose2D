@@ -254,7 +254,7 @@ disp(1000*psk);
 diary off;
 
 % Proporciona el PSD por consola en mGy
-disp(1000*psk)
+disp(num2str(1000*psk));
 
 return
 end
