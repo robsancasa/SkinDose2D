@@ -133,10 +133,11 @@ end
 
 %% Revisamos distancia foco detector
 if any(events.DistanceSourcetoDetector==0)
-    disp('Program terminated: No distance source to isocenter available');
-    disp(events.DistanceSourcetoDetector);
-    diary off;
-    return
+    disp('Warning. Some events had distance source to detector = 0 mm');
+    disp('Those events will not be considered for calculation')
+    disp(events(events.DistanceSourcetoDetector==0,:));
+    % Eliminamos eventos con DistanceSourcetoDetector < 500
+    events(events.DistanceSourcetoDetector<500,:) = [];
 end
 
 %% Revisamos colimación y utilizamos shutters si Collimated Field está
