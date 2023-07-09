@@ -13,12 +13,12 @@ Devuelve el valor de la dosis pico en piel y un mapa de dosis en formato png.<br
 Método de estimación:<br>
 Estima la proyección del kerma emitido por el tubo de rayos-X en el plano horizontal situado en el punto de referencia intervencionista 15 cm bajo el isocentro (en dirección al tubo).<br>
 Para cada evento de irradiación realiza el cálculo en un plano de tamaño 70x70 cm con una resolución de 2,5mm. Estima la dosis en cada uno de los puntos utilizando la expresión:<br><br>
-Dosis =Kerma rp · u_en_ro · BSF(kV, filtración, área campo) · TransMesa(kV, filtración, angulo brazo) · f_distancia<br><br>
+Dosis =Kerma rp · u_en_ro · BSF(kV, filtración, área campo) · TransMesa(kV, área campo, filtración, angulo brazo) · f_distancia<br><br>
 Donde:<br>
 Kerma rp es el kerma en el punto de referencia intervencionista.<br><br>
 u_en_ro es la razón de coeficientes de absorción en energía agua aire obtenido de la publicación Hamza Benmakhlouf1,2, Hugo Bouchard3, Annette Fransson1 and Pedro Andreo. Phys. Med. Biol. 56 (2011) 7179–7204 doi:10.1088/0031-9155/56/22/012<br><br>
 BSF es el factor de retrodispersión obtenido de la publicación Hamza Benmakhlouf1,2, Hugo Bouchard3, Annette Fransson1 and Pedro Andreo. Phys. Med. Biol. 56 (2011) 7179–7204 doi:10.1088/0031-9155/56/22/012<br><br>
-TransMesa es el factor de atenuación de la mesa dependiente de la calidad del haz y el ángulo de incidencia. Obtenido de medidas experimentales.<br><br>
+TransMesa es el factor de atenuación de la mesa dependiente de la calidad del haz y el ángulo de incidencia. Obtenido de Matthew C. DeLorenzo, Kai Yang, Xinhua Li, and Bob Liu. Comprehensive evaluation of broad-beam transmission of patient supports. Med. Phys. 45 (4), April 2018. 10.1002/mp.12803.<br><br>
 F_distancia es la corrección por distancia para cada haz de radiación, importante para los casos en que el haz está angulado y la distancia foco plano es diferente en las distintas partes del campo de radiación.<br><br>
 Como principales limitaciones hay que tener en cuenta:<br>
 Modela al paciente como una superficie horizontal. En angulaciones altas del brazo no tiene en cuenta correctamente la distancia foco piel.<br>
