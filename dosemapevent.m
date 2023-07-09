@@ -163,8 +163,9 @@ area = polyarea(xvert, yvert)/100; % Area en cm2 en el plano de ref.
 [bsf, u_en_ro] = bsf_mu(area, kV, f1mat, f1thick, f2mat, f2thick);
 
 % Factor de atenuacion de la mesa
-m_att = TableTransmision(kV, prim_ang, sec_ang, f1mat, f1thick, f2mat,...
-    f2thick);
+
+m_att = TableTransmision(kV, area, prim_ang, sec_ang, f1mat, f1thick,...
+    f2mat, f2thick);
 
 dmap = dmap*bsf*m_att*u_en_ro;
 
