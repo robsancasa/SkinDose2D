@@ -137,14 +137,14 @@ if any(events.DistanceSourcetoDetector==0)
     disp('Those events will not be considered for calculation')
     disp(events(events.DistanceSourcetoDetector==0,:));
     % Eliminamos eventos con DistanceSourcetoDetector < 500
-    events(events.DistanceSourcetoDetector<500,:) = [];
+    events(events.DistanceSourcetoDetector < 500,:) = [];
 end
 
-%% Revisamos colimación y utilizamos shutters si Collimated Field está
+%% Revisamos colimación y utilizamos area si Collimated Field está
 % vacío. Caso de los Allura. No necesario.
 if any(events.CollimatedFieldWidth == 0) || any(events.CollimatedFieldHeight == 0)
-    events.CollimatedFieldHeight = events.TopShutter + events.BottomShutter;
-    events.CollimatedFieldWidth = events.LeftShutter + events.RightShutter;
+    events.CollimatedFieldHeight = sqrt(events.CollimatedFieldArea);
+    events.CollimatedFieldWidth = sqrt(events.CollimatedFieldArea);
 end
 % Si la colimación sigue siendo 0 termina programa
 if any(events.CollimatedFieldWidth == 0) || any(events.CollimatedFieldHeight == 0)
@@ -171,6 +171,7 @@ for i = 1:nEvents
     CollimatedFieldWidth = events.CollimatedFieldWidth(i)*...
         1000/events.DistanceSourcetoDetector(i);
     fid = events.DistanceSourcetoIsocenter(i);
+
     kerma_rp = events.DoseRP(i);
     % La mesa se redefine desde la definicion dicom. Dicom es desde el
     % punto de vista del operador situado a la dcha paciente en supino.

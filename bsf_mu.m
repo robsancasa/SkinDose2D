@@ -1,11 +1,11 @@
-% Estima el factor de retrodispersión y el cociente de poderes de frenado másico por interpolación cúbica en función de x = filtración de cobre mm y = kV y z = lado del campo cuadrado en superficie en cm.
+% Estima el factor de retrodispersiÃ³n y el cociente de poderes de frenado mÃ¡sico por interpolaciÃ³n cÃºbica en funciÃ³n de x = filtraciÃ³n de cobre mm y = kV y z = lado del campo cuadrado en superficie en cm.
 function [bsf, u_en_ro] = bsf_mu(area_sup, y_kv_q, filtr1m, filtr1th, filtr2m, filtr2th)
-% Interpola valores de bsf y razón de poderes de frenado según la
+% Interpola valores de bsf y razÃ³n de poderes de frenado segÃºn la
 % referencia:
 % Hamza Benmakhlouf1,2, Hugo Bouchard3, Annette Fransson1 and Pedro Andreo.
-% Phys. Med. Biol. 56 (2011) 7179–7204 doi:10.1088/0031-9155/56/22/012
+% Phys. Med. Biol. 56 (2011) 7179Â–7204 doi:10.1088/0031-9155/56/22/012
 %
-% Table 3. Backscatter factors Bair(Q) and water-to-air mass energy–absorption coefficient ratios, 
+% Table 3. Backscatter factors Bair(Q) and water-to-air mass energyÂ–absorption coefficient ratios, 
 % (?en(Q)/?)w,air, at the entrance surface of a 15 cm thick water phantom for square
 % clinical beams of sides between 5 and 35 cm used in modern diagnostic and interventional radiology. 
 % The quality of the beams is specified in terms of kilovoltage, inherent and added
@@ -46,7 +46,7 @@ v2_u_en_ro = [1.016 1.016 1.016 1.016 1.016 1.03 1.029 1.028 1.028 1.028 1.045 1
     1.02 1.02 1.019 1.019 1.019 1.047 1.045 1.043 1.043 1.042 1.064 1.062 1.059 1.058 1.058 1.076 1.074 1.071 1.071 1.07]';
 % Lado del campo cuadrado en superficie
 x_tc_q = double(sqrt(area_sup));
-% Extraemos la filtración de cobre de la info del RDSR
+% Extraemos la filtraciÃ³n de cobre de la info del RDSR
 z_f_q = 0;
 if (strcmp(filtr1m,'Copper or Copper compound') == 1 ||...
         strcmp(filtr2m,'Copper or Copper compound') == 1)
@@ -57,10 +57,10 @@ if (strcmp(filtr1m,'Copper or Copper compound') == 1 ||...
     end
 end
 
-% Interpolants para evaluar función
+% Interpolants para evaluar funciÃ³n
 F_BSF = scatteredInterpolant(x_tc, y_kv, z_f, v1_BSF, "natural", "nearest");
 F_u = scatteredInterpolant(x_tc, y_kv, z_f, v2_u_en_ro, "natural", "nearest");
-% Estimación de bsf y u_en_ro por interpolación
+% EstimaciÃ³n de bsf y u_en_ro por interpolaciÃ³n
 bsf = F_BSF(x_tc_q, y_kv_q, z_f_q);
 u_en_ro = F_u(x_tc_q, y_kv_q, z_f_q);
 end
