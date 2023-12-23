@@ -22,7 +22,7 @@ TransMesa es el factor de atenuación de la mesa dependiente de la calidad del h
 F_distancia es la corrección por distancia para cada haz de radiación, importante para los casos en que el haz está angulado y la distancia foco plano es diferente en las distintas partes del campo de radiación.<br><br>
 Como principales limitaciones hay que tener en cuenta:<br>
 Modela al paciente como una superficie horizontal. En angulaciones altas del brazo no tiene en cuenta correctamente la distancia foco piel.<br>
-Aunque sí tiene en cuenta desplazamientos laterales de la mesa, pero si la posición del paciente es muy diferente del punto de referencia intervencionista, no se tiene en cuenta. Esto puede afectar tanto al tamaño de campo de radiación en la piel del paciente como a la corrección por distancia del kerma en el punto de referencia.<br>
+Aunque sí tiene en cuenta desplazamientos laterales de la mesa, la posición vertical de la mesa es considerada dependiendo del fabricante. Si considera la altura de la mesa en los Philps, Siemens y GE. Esto puede afectar tanto al tamaño de campo de radiación en la piel del paciente como a la corrección por distancia del kerma en el punto de referencia.<br>
 El programa tiene como variable de entrada un fichero con la información del procedimiento proporcionado por la utilidad DOLQA, que deberá contener al menos los siguientes campos para todos los eventos:<br>
 Dose RP                            Kerma en el punto de referencia interv (mGy)<br>
 Positioner Primary Angle            Angulo lateral (gra) segun DICOM LAO = +90º y RAO = -90º posicion det imag.<br>
