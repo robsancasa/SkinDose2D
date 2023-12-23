@@ -225,8 +225,10 @@ switch events.Manufacturer{1}
             events.TableHeightPosition);
     case "Canon"
         couch_vertical = -150;
+    case "Siemens"
+        couch_vertical = -1*events.TableHeightPosition;
     otherwise
-        couch_vertical = events.TableHeightPosition;
+        couch_vertical = -1*events.TableHeightPosition;
 end
 
 
