@@ -26,9 +26,8 @@ function dmap = dosemapevent(prim_ang, sec_ang, coll_w, coll_h,...
 % posicion anterior. Si y_couch>0 la mesa % se desplaza hacia la cabeza 
 % (el campo hacia los pies del mapa). Paciente en supino.
 
-% z_couch es el desplazamiento de mesa en altura en mm respecto del plano de
-% referencia que a su vez esta 150 mm bajo el isocentro. Si z_couch<0 hacia
-% el foco
+% z_couch es el desplazamiento de mesa en altura en mm respecto del
+% isocentro. Si z_couch<0 la mesa hacia el suelo
 
 %prim_ang = 0;
 %sec_ang = 0;
@@ -89,8 +88,10 @@ FP_mp = prot_mp - foco;
 FP_mm = prot_mm - foco;
 FP_pm = prot_pm - foco;
 
-% El plano de calculo estará en el plano del punto de referencia
-p_calc = -150; %+ z_couch no utilizado;
+% El plano de calculo estará en el plano de la mesa
+%p_calc = -150; %+ z_couch no utilizado;
+p_calc = z_couch; %+ z_couch es la posicion de la mesa respecto del iso;
+
 
 % Parámetro t resultante de la solución de la intersección recta con el
 % plano de calculo
@@ -124,7 +125,7 @@ resy = 1600/(n-1);
 %dmap = zeros(m,n);
 
 % Definimos las matrices xquer e yquer que contienen las coordenadas x e y
-% del plano de calculo, de -350 a 350 mm
+% del plano de calculo, de x -400 a 400 mm e y -800 a 800
 xq = -400:resx:400;
 xquer = repmat(xq,n,1);
 yq = (-800:resy:800)';
@@ -144,7 +145,7 @@ facdist = power(xquer-foco(1),2) + power(yquer-foco(2),2) + ...
     (p_calc-foco(3))^2;
 facdist = power(facdist,0.5);
 facdist = power(facdist*1/(fid-150),-2);
-%mesh(facdist);
+% mesh(facdist);
 
 % Comprueba que el punto del plano (xquer,yquer)está dentro del cuadrilátero que
 % que define el campo y en caso afirmativo le asigna el kerma k
