@@ -20,9 +20,9 @@ u_en_ro es la razón de coeficientes de absorción en energía agua aire obtenid
 BSF es el factor de retrodispersión obtenido de la publicación Hamza Benmakhlouf1,2, Hugo Bouchard3, Annette Fransson1 and Pedro Andreo. Phys. Med. Biol. 56 (2011) 7179–7204 doi:10.1088/0031-9155/56/22/012<br><br>
 TransMesa es el factor de atenuación de la mesa dependiente de la calidad del haz y el ángulo de incidencia. Obtenido de Matthew C. DeLorenzo, Kai Yang, Xinhua Li, and Bob Liu. Comprehensive evaluation of broad-beam transmission of patient supports. Med. Phys. 45 (4), April 2018. 10.1002/mp.12803.<br><br>
 F_distancia es la corrección por distancia para cada haz de radiación, importante para los casos en que el haz está angulado y la distancia foco plano es diferente en las distintas partes del campo de radiación.<br><br>
-Como principales limitaciones hay que tener en cuenta:<br>
+## Principales limitaciones hay que tener en cuenta:<br>
 Modela al paciente como una superficie horizontal. En angulaciones altas del brazo no tiene en cuenta correctamente la distancia foco piel.<br>
-Aunque sí tiene en cuenta desplazamientos laterales de la mesa, la posición vertical de la mesa es considerada dependiendo del fabricante. Si considera la altura de la mesa en los Philps, Siemens y GE. Esto puede afectar tanto al tamaño de campo de radiación en la piel del paciente como a la corrección por distancia del kerma en el punto de referencia.<br>
+Aunque sí tiene en cuenta desplazamientos laterales de la mesa de forma relativa (respecto a la posición inicial), la posición vertical de la mesa es considerada dependiendo del fabricante. Si considera la altura de la mesa en los Philps, Siemens y GE. Esto puede afectar tanto al tamaño de campo de radiación en la piel del paciente como a la corrección por distancia del kerma en el punto de referencia.<br>
 El programa tiene como variable de entrada un fichero con la información del procedimiento proporcionado por la utilidad DOLQA, que deberá contener al menos los siguientes campos para todos los eventos:<br>
 Dose RP                            Kerma en el punto de referencia interv (mGy)<br>
 Positioner Primary Angle            Angulo lateral (gra) segun DICOM LAO = +90º y RAO = -90º posicion det imag.<br>
